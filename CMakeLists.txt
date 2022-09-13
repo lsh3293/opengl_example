@@ -11,7 +11,11 @@ set(WINDOW_WIDTH 960)
 set(WINDOW_HEIGHT 540)
 
 project(${PROJECT_NAME}) # 프로젝트 선언
-add_executable(${PROJECT_NAME} src/main.cpp) # 실행파일을 만들 때 컴파일할 파일
+add_executable(${PROJECT_NAME} 
+  src/main.cpp  # 실행파일을 만들 때 컴파일할 파일
+  src/common.cpp src/common.h
+  src/shader.cpp src/shader.h
+)
 
 include(Dependency.cmake) # Dependency.cmake 파일 불러오기
 
