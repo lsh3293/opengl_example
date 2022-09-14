@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME}
   src/main.cpp  # 실행파일을 만들 때 컴파일할 파일
   src/common.cpp src/common.h
   src/shader.cpp src/shader.h
+  src/program.cpp src/program.h
 )
 
 include(Dependency.cmake) # Dependency.cmake 파일 불러오기
