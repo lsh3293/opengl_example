@@ -67,15 +67,19 @@ bool Context::Init() {
 
     m_texture = Texture::CreateFromImage(image.get());
 
+    // 텍스처 최대 32개 까지 동시 사용 가능함
     auto image2 = Image::Load("./image/awesomeface.png");
     m_texture2 = Texture::CreateFromImage(image2.get());
 
+    // 텍스처 슬롯0에 m_texture1 텍스처 오브젝트 바인딩
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_texture->Get());
+    // 텍스처 슬롯1에 m_texture2 텍스처 오브젝트 바인딩
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
 
     m_program->Use();
+    // sampler2D uniform에 텍스처 슬롯 인덱스를 입력
     glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
     glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
 
