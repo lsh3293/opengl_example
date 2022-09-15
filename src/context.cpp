@@ -65,28 +65,7 @@ bool Context::Init() {
         return false;
     SPDLOG_INFO("image: {}x{}, {} channels",image->GetWidth(), image->GetHeight(), image->GetChannelCount());
 
-    glGenTextures(1, &m_texture);
-    glBindTexture(GL_TEXTURE_2D, m_texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    /*
-        바인딩된 텍스처의 크기 / 픽셀 포맷을 설정하고 GPU에 이미지 데이터를 복사
-        target: 대상이 될 바인딩 텍스처
-        level: 설정할 텍스처 레벨. 0레벨이 base. 추후 설명
-        internalFormat: 텍스처의 픽셀 포맷
-        width: 텍스처 / 이미지의 가로 크기
-        height: 텍스처 / 이미지의 세로 크기
-        border: 텍스처 외곽의 border 크기
-        format: 입력하는 이미지의 픽셀 포맷
-        type: 입력하는 이미지의 채널별 데이터 타입
-        data: 이미지 데이터가 기록된 메모리 주소
-    */
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
-        image->GetWidth(), image->GetHeight(), 0,
-        GL_RGB, GL_UNSIGNED_BYTE, image->GetData());
+    m_texture = Texture::CreateFromImage(image.get());
 
     return true;
 }
