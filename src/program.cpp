@@ -1,7 +1,6 @@
 #include "program.h"
 
-ProgramUPtr Program::Create(
-    const std::vector<ShaderPtr>& shaders) {
+ProgramUPtr Program::Create(const std::vector<ShaderPtr>& shaders) {
     auto program = ProgramUPtr(new Program());
     if (!program->Link(shaders))
         return nullptr;
@@ -14,8 +13,7 @@ Program::~Program() {
     }
 }
 
-bool Program::Link(
-    const std::vector<ShaderPtr>& shaders) {
+bool Program::Link(const std::vector<ShaderPtr>& shaders) {
     m_program = glCreateProgram();
     for (auto& shader: shaders)
         glAttachShader(m_program, shader->Get());
