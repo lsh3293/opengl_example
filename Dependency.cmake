@@ -58,3 +58,20 @@ ExternalProject_Add(
     )
 set(DEP_LIST ${DEP_LIST} dep_glad)
 set(DEP_LIBS ${DEP_LIBS} glad)
+
+# stb
+ExternalProject_Add(
+    dep_stb
+    GIT_REPOSITORY "https://github.com/nothings/stb"
+    GIT_TAG "master"
+    GIT_SHALLOW 1
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND "" # header file 만 필요하기 때문에 빌드 필요 없음
+    TEST_COMMAND ""
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy # ${CMAKE_COMMAND} -E <- Windows, Mac 등 OS 에 구애받지 않도록, copy <- 복사 커맨드
+        ${PROJECT_BINARY_DIR}/dep_stb-prefix/src/dep_stb/stb_image.h
+        ${DEP_INSTALL_DIR}/include/stb/stb_image.h
+    )
+set(DEP_LIST ${DEP_LIST} dep_stb)
