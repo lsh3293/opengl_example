@@ -33,27 +33,18 @@ bool Context::Init() {
         3. vertex attribute setting
         ※ vertex attribute을 설정하기 전에 VBO가 바인딩 되어있을 것
     */
-    glGenVertexArrays(1, &m_vertexArrayObject);
-    glBindVertexArray(m_vertexArrayObject);
+    m_vertexLayout = VertexLayout::Create();
 
-    glGenBuffers(1, &m_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, vertices, GL_STATIC_DRAW);
+    m_vertexBuffer = Buffer::CreateWithData(
+        GL_ARRAY_BUFFER, GL_STATIC_DRAW, vertices, sizeof(float) * 12);
 
+	m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+    
     glEnableVertexAttribArray(0);
-    /*
-        n: 정점의 n번째 attribute
-        size: 해당 attribute는 몇개의 값으로 구성되어 있는가?
-        type: 해당 attribute의 데이터 타입
-        normalized: 0~1사이의 값인가
-        stride: 두 정점간의 간격 (byte 단위)
-        offset: 첫 정점의 헤당 attribute까지의 간격 (byte 단위)
-    */
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
 
-    glGenBuffers(1, &m_indexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 6, indices, GL_STATIC_DRAW);
+    m_indexBuffer = Buffer::CreateWithData(
+        GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW, indices, sizeof(uint32_t) * 6);
 
     ShaderPtr vertShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
     ShaderPtr fragShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
@@ -75,7 +66,7 @@ bool Context::Init() {
 void Context::Render() {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(m_program->Get());
+    m_program->Use();
     /*
         현재 바인딩된 VAO, VBO, EBO를 바탕으로 그리기
         primitive: 그려낼 기본 primitive 타입

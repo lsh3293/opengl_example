@@ -8,6 +8,12 @@ ProgramUPtr Program::Create(
     return std::move(program);
 }
 
+Program::~Program() {
+    if (m_program) {
+        glDeleteProgram(m_program);
+    }
+}
+
 bool Program::Link(
     const std::vector<ShaderPtr>& shaders) {
     m_program = glCreateProgram();
@@ -25,8 +31,6 @@ bool Program::Link(
     return true;
 }
 
-Program::~Program() {
-    if (m_program) {
-        glDeleteProgram(m_program);
-    }
+void Program::Use() const {
+    glUseProgram(m_program);
 }
