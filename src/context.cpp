@@ -171,7 +171,7 @@ void Context::Render() {
       m_cameraPos + m_cameraFront,
       m_cameraUp);
 
-    for (size_t i = 0; i < cubePositions.size(); i++){
+    for (size_t i = 0; i < cubePositions.size(); i++) {
         auto& pos = cubePositions[i];
         auto model = glm::translate(glm::mat4(1.0f), pos);
         model = glm::rotate(model,
