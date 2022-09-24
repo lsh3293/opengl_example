@@ -159,16 +159,17 @@ void Context::Render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
-    auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 20.0f);
+    // (0, 0, -1) 방향을 x축, y축에 따라 회전
+    m_cameraFront = glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraYaw), glm::vec3(0.0f, 1.0f, 0.0f)) * 
+    glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f)) *
+    glm::vec4(0.0f, 0.0f, -1.0f, 0.0f); // 회전을 위해 w = 0 <= 평행이동 X
 
-    float angle = glfwGetTime() * glm::pi<float>() * 0.5f;
-    auto x = sinf(angle) * 10.0f;
-    auto z = cosf(angle) * 10.0f;
-    auto cameraPos = glm::vec3(x, 0.0f, z);
-    auto cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    auto cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    auto projection = glm::perspective(glm::radians(45.0f), (float)m_width / (float)m_height, 0.01f, 50.0f);
 
-    auto view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+    auto view = glm::lookAt(
+      m_cameraPos,
+      m_cameraPos + m_cameraFront,
+      m_cameraUp);
 
     for (size_t i = 0; i < cubePositions.size(); i++){
         auto& pos = cubePositions[i];
@@ -186,5 +187,68 @@ void Context::Render() {
             pointer/offset: 그리고자 하는 EBO의 첫 데이터로부터의 오프셋
         */
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    }
+}
+
+void Context::ProcessInput(GLFWwindow* window) {
+    if (!m_cameraControl)
+        return;
+
+    const float cameraSpeed = 0.05f;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        m_cameraPos += cameraSpeed * m_cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        m_cameraPos -= cameraSpeed * m_cameraFront;
+
+    auto cameraRight = glm::normalize(glm::cross(m_cameraUp, -m_cameraFront));
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        m_cameraPos += cameraSpeed * cameraRight;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        m_cameraPos -= cameraSpeed * cameraRight;    
+
+    auto cameraUp = glm::normalize(glm::cross(-m_cameraFront, cameraRight));
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        m_cameraPos += cameraSpeed * cameraUp;
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        m_cameraPos -= cameraSpeed * cameraUp;
+}
+
+void Context::Reshape(int width, int height) {
+    m_width = width;
+    m_height = height;
+    // OpenGL이 그림을 그릴 화면의 위치 및 크기 설정 (x, y, width, height)
+    glViewport(0, 0, m_width, m_height);
+}
+
+void Context::MouseMove(double x, double y) {
+    if (!m_cameraControl)
+        return;
+
+    auto pos = glm::vec2((float)x, (float)y);
+    auto deltaPos = pos - m_prevMousePos;
+
+    const float cameraRotSpeed = 0.8f;
+    m_cameraYaw -= deltaPos.x * cameraRotSpeed;
+    m_cameraPitch -= deltaPos.y * cameraRotSpeed;
+
+    if (m_cameraYaw < 0.0f)   m_cameraYaw += 360.0f;
+    if (m_cameraYaw > 360.0f) m_cameraYaw -= 360.0f;
+
+    if (m_cameraPitch > 89.0f)  m_cameraPitch = 89.0f;
+    if (m_cameraPitch < -89.0f) m_cameraPitch = -89.0f;
+
+    m_prevMousePos = pos;    
+}
+
+void Context::MouseButton(int button, int action, double x, double y) {
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+        if (action == GLFW_PRESS) {
+            // 마우스 조작 시작 시점에 현재 마우스 커서 위치 저장
+            m_prevMousePos = glm::vec2((float)x, (float)y);
+            m_cameraControl = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            m_cameraControl = false;
+        }
     }
 }

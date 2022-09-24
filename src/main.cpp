@@ -10,8 +10,8 @@
 
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
-    // OpenGL이 그림을 그릴 화면의 위치 및 크기 설정 (x, y, width, height)
-    glViewport(0, 0, width, height);
+    auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
+    context->Reshape(width, height);
 }
 
 void OnKeyEvent(GLFWwindow* window,
@@ -27,6 +27,18 @@ void OnKeyEvent(GLFWwindow* window,
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
+}
+
+void OnCursorPos(GLFWwindow* window, double x, double y) {
+    auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
+    context->MouseMove(x, y);
+}
+
+void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
+    auto context = (Context*)glfwGetWindowUserPointer(window);
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+    context->MouseButton(button, action, x, y);
 }
 
 int main(int argc, const char** argv) {
@@ -79,15 +91,22 @@ int main(int argc, const char** argv) {
         return -1;
     }
     
+    // glfw callback 내에서 context 사용 
+    //   - user pointer 기능을 이용
+    glfwSetWindowUserPointer(window, context.get());
+
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
+	glfwSetCursorPosCallback(window, OnCursorPos);
+    glfwSetMouseButtonCallback(window, OnMouseButton);
 
     // glfw 루프 실행, 윈도우 close 버튼을 누르면 정상 종료
     SPDLOG_INFO("Start main loop");
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         
+        context->ProcessInput(window);
         context->Render();
 
         /**
